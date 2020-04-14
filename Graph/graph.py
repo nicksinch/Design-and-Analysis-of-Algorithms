@@ -1,5 +1,5 @@
 """ 
-    Graph class with the most essential and famous algorithms implemented 
+    Graph class with the most essential and famous algorithms implemented. 
 """
 
 
@@ -31,7 +31,7 @@ class Graph:
 
 
     def vertices(self):
-        """ returns the vertices of the graph """
+        """ returns a list of the vertices of the graph """
         return list(vertex.value for vertex in self.__graph_dict.keys())
 
 
@@ -49,7 +49,8 @@ class Graph:
 
 
     def add_vertex(self, vertex):
-        """ If the vertex is not in the graph, a vertex : [] key-value is added
+        """ 
+            If the vertex is not in the graph, a vertex : [] key-value is added
             to the graph_dictionary, otherwise nothing has to be done.
         """
         if vertex not in self.__graph_dict:
@@ -61,9 +62,7 @@ class Graph:
             i.e. adds an edge. However if the vertex is not present in the graph,
             nothing can be connected, so we do nothing.
         """
-        if from_vertex not in self.__graph_dict:
-            return
-        else:
+        if from_vertex.value in self.vertices():
             self.__graph_dict[from_vertex] = {to_vertex : weight}
 
 
@@ -71,20 +70,25 @@ class Graph:
         """ Runs the Prim's algorithm which results in generating a minimum spanning tree. """
         mst = defaultdict(set)
         visited = set([starting_vertex])
-        edges = [
-            (cost, starting_vertex, to.getValue())
+        weighted_edges = [
+            (cost, starting_vertex, to)
             for to, cost in self.__graph_dict[starting_vertex].items()
         ]
-        heapq.heapify(edges)
+        heapq.heapify(weighted_edges)
 
-        while edges:
-            cost, frm, to = heapq.heappop(edges)
+        while weighted_edges:
+            cost, frm, to = heapq.heappop(weighted_edges)
             if to not in visited:
                 visited.add(to)
                 mst[frm].add(to)
                 for to_next, cost in self.__graph_dict[to].items():
-                    if to_next.getValue() not in visited:
-                        heapq.heappush(edges, (cost, to.getValue(), to_next.getValue()))
+                    if to_next not in visited:
+                        heapq.heappush(weighted_edges, (cost, to, to_next))
+        
+        for key in mst.keys():
+            mst[key] = key.value
+            for item in mst[key].items():
+                mst[key][item] = item.value
         return mst
 
 
@@ -132,25 +136,63 @@ class Graph:
 
 
     def __DFSUtil(self, start_vertex, visited):
-        visited.add(start_vertex)
-        print(start_vertex, end=' ')
+        visited.add(start_vertex.value)
+        print(start_vertex.value, end=' ')
         for neighbour in self.__graph_dict[start_vertex]:
-            if neighbour not in visited:
+            if neighbour.value not in visited:
                 self.__DFSUtil(neighbour,visited)
 
 
+    def BFS(self, start_vertex):
+        visited, queue = [start_vertex], [start_vertex]
+
+        while queue:
+            current_vertex = queue.pop()
+            print(current_vertex.value, end = " ")
+
+            for neighbour in self.__graph_dict[current_vertex]:
+                if neighbour not in visited:
+                    visited.append(neighbour)
+                    queue.append(neighbour)
+
+
+A = Vertex('A')
+B = Vertex('B')
+C = Vertex('C')
+D = Vertex('D')
+E = Vertex('E')
+F = Vertex('F')
+G = Vertex('G')
+
 example_graph = {
-    Vertex('A'): { Vertex('B'): 2, Vertex('C'): 3},
-    Vertex('B'): { Vertex('A'): 2, Vertex('C'): 1, Vertex('D'): 1, Vertex('E'): 4},
-    Vertex('C'): { Vertex('A'): 3, Vertex('B'): 1, Vertex('F'): 5},
-    Vertex('D'): { Vertex('B'): 1, Vertex('E'): 1},
-    Vertex('E'): { Vertex('B'): 4, Vertex('D'): 1, Vertex('F'): 1},
-    Vertex('F'): { Vertex('C'): 5, Vertex('E'): 1, Vertex('G'): 1},
-    Vertex('G'): { Vertex('F'): 1},
+    A: { 
+        B: 2, C: 3
+    },
+    B: { 
+        A: 2, C: 1, D: 1, E: 4
+    },
+    C: { 
+        A: 3, B: 1, F: 5
+    },
+    D: { 
+        B: 1, E: 1
+    },
+    E: { 
+        B: 4, D: 1, F: 1
+    },
+    F: { 
+        C: 5, E: 1, G: 1
+    },
+    G: { 
+        F: 1
+    },
 }
 
 g = Graph(example_graph)
-a = list(example_graph)[0]
-print(a)
-print(g.prim_spanning_tree(a))
+g.DFS(A)
+print()
+g.BFS(A)
+# pr = g.prim_spanning_tree(A)
+
+# print(pr)
 # https://www.python-course.eu/graphs_python.php

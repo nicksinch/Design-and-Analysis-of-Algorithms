@@ -15,3 +15,6 @@ class Vertex:
     @property
     def value(self):
         return self.__value
+
+    def __lt__(self, other):
+        return self.value < other.value
