@@ -35,6 +35,11 @@ class Graph:
         return list(vertex.value for vertex in self.__graph_dict.keys())
 
 
+    def num_of_vertices(self):
+        num = (len(self.__graph_dict))
+        return num
+
+
     def edges(self):
         return self.__generate_edges()
 
@@ -156,6 +161,56 @@ class Graph:
                     queue.append(neighbour)
 
 
+    def Bellman_Ford(self, start_vertex):
+        """ 
+            Bellman-Ford's single source shortest path algorithm to find shortest path from a start_vertex
+            to all other vertices in the graph.
+            Time complexity is : O(|V| * |E|)
+        """
+
+        num_vertices = len(self.__graph_dict)
+
+        # Step 1:
+        # A dictionary dist to keep track of the current shortest path distances
+        # At the beginning , Initializing all distances from src to Inf, except the start_vertex which is 0
+          
+        dist = dict()
+        for i in self.__graph_dict:
+            dist[i.value] = float("Inf")
+        dist[start_vertex.value] = 0
+        
+        # Step 2:
+        # There are three 'for' loops just because my implementation is dict of dicts.
+        # Note that this not necessarily means the time complexity is O(N^3), it is O(|V| * |E|).
+        # This step is relaxing all edges |V| - 1 times. A simple shortest path path from start_vertex
+        # to any other vertex can have at most |V| - 1 edges
+
+        for _ in range(num_vertices - 1):
+            for vertex in self.__graph_dict:
+                u = vertex.value
+                vertex_edges = self.__graph_dict[vertex]
+                for v in vertex_edges:
+                    if dist[u] != float("Inf") and dist[u] + vertex_edges[v] < dist[v.value]:
+                        dist[v.value] = dist[u] + vertex_edges[v]
+
+        # Step 3: check for negative-weight cycles. The above step  
+        # guarantees shortest distances if graph doesn't contain  
+        # negative weight cycle. If we get a shorter path, then there  
+        # is a cycle.
+        for vertex in self.__graph_dict:
+            u = vertex.value
+            vertex_edges = self.__graph_dict[vertex]
+            for v in vertex_edges:
+                if dist[u] != float("Inf") and dist[u] + vertex_edges[v] < dist[v.value]:
+                    print("Graph contains weight cycle !")
+                    return
+
+        print(dist)
+
+
+
+
+S = Vertex('S')
 A = Vertex('A')
 B = Vertex('B')
 C = Vertex('C')
@@ -163,6 +218,7 @@ D = Vertex('D')
 E = Vertex('E')
 F = Vertex('F')
 G = Vertex('G')
+
 
 example_graph = {
     A: { 
@@ -188,10 +244,61 @@ example_graph = {
     },
 }
 
-g = Graph(example_graph)
-g.DFS(A)
-print()
-g.BFS(A)
+oriented_graph = {
+    S: {
+        A : 10,
+        E : 8
+    },
+    A : {
+        C : 2 
+    },
+    C : {
+        B : -2
+    },
+    B : {
+        A : 1
+    },
+    E : {
+        D : 1
+    },
+    D : {
+        A : -4,
+        C : -1
+    }
+}
+
+oriented_graph_two = {
+    S: {
+        A : -1,
+        B : 4
+    },
+    A : {
+        B : 3,
+        C : 2,
+        D : 2
+    },
+    B : {
+
+    },
+    C: {
+        B : 5,
+        A : 1
+    },
+    D : {
+        C : -3
+    }
+}
+
+
+
+
+g = Graph(oriented_graph_two)
+g.Bellman_Ford(S)
+
+# g = Graph(example_graph)
+# g.DFS(A)
+# print()
+# g.BFS(A)
 # pr = g.prim_spanning_tree(A)
 
 # print(pr)
